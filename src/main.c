@@ -16,6 +16,7 @@
 static AppConfig cfg;
 static char last_q[1024] = "";
 static char last_a[4096] = "";
+static int last_ok = 1;
 static int state = 0; /* 0 home 1 answer 2 settings 3 history */
 
 #define MAXH 50
@@ -104,8 +105,16 @@ static void draw_robot(int cx, int cy, int r, bool blink, float talk, float smil
         for (int i = 0; i < browLen; i++) {
             int x = bx + i;
             int y = browY;
-            if (emotion == 3) { /* enfadado: cejas inclinadas hacia el centro */
+            int mid = browLen / 2;
+            int dist = (i > mid) ? (i - mid) : (mid - i);
+            if (emotion == 1) { /* feliz: cejas arriba en el centro */
+                y = browY - (mid - dist) / 4;
+            } else if (emotion == 2) { /* triste: cejas bajas en el centro */
+                y = browY + (mid - dist) / 4;
+            } else if (emotion == 3) { /* enfadado: cejas inclinadas hacia el centro */
                 if (e == 0) y = browY + i / 3; else y = browY + (browLen - i) / 3;
+            } else if (emotion == 4) { /* sorprendido: cejas mas arriba */
+                y = browY - 8;
             }
             SDL_Rect px = { x, y, 1, 3 };
             SDL_RenderFillRect(ren, &px);
@@ -117,7 +126,7 @@ static void draw_robot(int cx, int cy, int r, bool blink, float talk, float smil
     int my = cy + r / 3;
     for (int i = 0; i < mw; i++) {
         int x = mx + i;
-        int off = (int)(-smile * 0.02f * (float)(i - mw/2) * (float)(i - mw/2));
+        int off = (int)(-smile * 0.03f * (float)(i - mw/2) * (float)(i - mw/2));
         for (int s = 0; s < 3; s++) {
             SDL_Rect m = { x, my + off + s, 1, 1 };
             SDL_RenderFillRect(ren, &m);
@@ -153,7 +162,7 @@ int main(int argc, char *argv[]) {
         else talk *= 0.85f;
 
         if (thinking) { target_smile = 0.15f; }
-        else if (state == 1) { target_smile = 0.4f; }
+        else if (state == 1) { target_smile = last_ok ? 0.4f : -0.3f; }
         else { target_smile = 0.0f; }
         smile += (target_smile - smile) * 0.1f;
 
@@ -187,7 +196,8 @@ int main(int argc, char *argv[]) {
                         char sys[1024]; strncpy(sys, cfg.system_prompt, sizeof(sys)-1); sys[sizeof(sys)-1]=0;
                         int prov = cfg.provider;
                         if (prov == CFG_PROVIDER_OPENROUTER && !cfg.api_key[0]) prov = CFG_PROVIDER_POLLINATIONS;
-                        net_ask(prov, cfg.model, cfg.api_key, sys, last_q, last_a, sizeof(last_a));
+                        int rc = net_ask(prov, cfg.model, cfg.api_key, sys, last_q, last_a, sizeof(last_a));
+                        last_ok = (rc == 0) && last_a[0] && (strncmp(last_a, "Error", 5) != 0);
 
                         thinking = false;
                         if (last_a[0]) {
@@ -219,7 +229,7 @@ int main(int argc, char *argv[]) {
             };
             ap_draw_footer(foot, 3);
         } else if (state == 1) {
-            draw_robot(w / 2, h / 2, (w < h ? w : h) / 2 - 80, blink, 0.3f, smile, 1);
+            draw_robot(w / 2, h / 2, (w < h ? w : h) / 2 - 80, blink, 0.3f, smile, last_ok ? 1 : 2);
             TTF_Font *f = ap_get_font(AP_FONT_SMALL);
             ap_color txt = ap_hex_to_color("#FFFFFF");
             ap_draw_text(f, "Respuesta:", 40, h / 3, txt);

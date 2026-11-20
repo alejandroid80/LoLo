@@ -15,7 +15,9 @@ El binario queda en `LoLo.pak/bin/lolo`.
 
 ## Instalar
 
-Copia la carpeta `LoLo.pak` a `Tools/tg5040/` en la SD card.
+Extrae el contenido del artefacto en `Tools/tg5040/` de la SD card, de forma que
+quede `Tools/tg5040/LoLo.pak/launch.sh` (no `Tools/tg5040/LoLo.pak/LoLo.pak/...`).
+Si ya existía una carpeta `LoLo.pak`, bórrala antes de extraer.
 
 ## Compilar en la nube (GitHub Actions)
 

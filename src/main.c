@@ -171,6 +171,8 @@ int main(int argc, char *argv[]) {
     float talk = 0.0f;
     bool thinking = false;
     float smile = 0.0f, target_smile = 0.0f;
+    bool exit_pending = false;
+    Uint32 exit_time = 0;
 
     bool running = true;
     while (running) {
@@ -179,6 +181,7 @@ int main(int argc, char *argv[]) {
         if (blink && now > blinkEnd) blink = false;
         if (thinking) talk = (sinf((float)now / 120.0f) + 1.0f) / 2.0f;
         else talk *= 0.85f;
+        if (exit_pending && (now - exit_time) > 2000) exit_pending = false;
 
         if (thinking) { target_smile = 0.15f; }
         else if (state == 1) { target_smile = last_ok ? 0.4f : -0.3f; }
@@ -190,8 +193,19 @@ int main(int argc, char *argv[]) {
             while (ap_poll_input(&ev)) {
                 if (!ev.pressed) continue;
                 if (ev.button == AP_BTN_B) {
-                    if (state == 0) running = false;
-                    else state = 0;
+                    if (state == 0) {
+                        if (exit_pending && (now - exit_time) < 2000) {
+                            running = false;
+                        } else {
+                            exit_pending = true;
+                            exit_time = now;
+                        }
+                    } else {
+                        state = 0;
+                        exit_pending = false;
+                    }
+                } else {
+                    exit_pending = false;
                 }
                 if (ev.button == AP_BTN_X) state = 2;
                 if (ev.button == AP_BTN_UP) { chat_scroll -= 60; if (chat_scroll < 0) chat_scroll = 0; }
@@ -254,6 +268,9 @@ int main(int argc, char *argv[]) {
             ap_color txt = ap_hex_to_color("#FFFFFF");
             const char *status = thinking ? "Pensando..." : "Listo";
             ap_draw_text(f, status, leftW / 2 - 30, h / 2 + robotR + 5, txt);
+            if (exit_pending) {
+                ap_draw_text(f, "Pulsa B de nuevo para salir", leftW / 2 - 80, h / 2 + robotR + 25, txt);
+            }
             int bubbleMaxW = rightW * 2 / 3;
             int visibleH = h - 100;
             SDL_Rect clip = { rightX, 40, rightW, visibleH };

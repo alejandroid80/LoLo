@@ -159,7 +159,8 @@ int main(int argc, char *argv[]) {
         .window_title = "LoLo",
         .log_path = ap_resolve_log_path("lolo"),
         .is_nextui = AP_PLATFORM_IS_DEVICE,
-        .font_path = "/mnt/SDCARD/.system/res/font1.ttf"
+        .font_path = "/mnt/SDCARD/.system/res/font1.ttf",
+        .disable_background = true
     };
     if (ap_init(&acfg) != AP_OK) return 1;
     config_load(&cfg);

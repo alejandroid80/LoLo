@@ -18,6 +18,7 @@ static char last_q[1024] = "";
 static char last_a[4096] = "";
 static int last_ok = 1;
 static int state = 0; /* 0 home 1 answer 2 settings 3 history */
+static int chat_scroll = 0;
 
 #define MAXH 50
 typedef struct { char q[256]; char a[512]; } HItem;
@@ -193,12 +194,15 @@ int main(int argc, char *argv[]) {
                     else state = 0;
                 }
                 if (ev.button == AP_BTN_X) state = 2;
+                if (ev.button == AP_BTN_UP) { chat_scroll -= 60; if (chat_scroll < 0) chat_scroll = 0; }
+                if (ev.button == AP_BTN_DOWN) { chat_scroll += 60; }
                 if (ev.button == AP_BTN_A && state == 0 && !thinking) {
                     ap_keyboard_result kr;
                     int rc = ap_keyboard("", "Escribe tu pregunta:  (B: cancelar)", AP_KB_GENERAL, &kr);
                     if (rc == AP_OK && kr.text[0]) {
                         strncpy(last_q, kr.text, sizeof(last_q) - 1);
                         last_q[sizeof(last_q)-1] = 0;
+                        chat_scroll = 0;
                         thinking = true;
 
                         int w = ap_get_screen_width(), h = ap_get_screen_height();
@@ -221,6 +225,7 @@ int main(int argc, char *argv[]) {
                         if (prov == CFG_PROVIDER_OPENROUTER && !cfg.api_key[0]) prov = CFG_PROVIDER_POLLINATIONS;
                         int rc = net_ask(prov, cfg.model, cfg.api_key, sys, last_q, last_a, sizeof(last_a));
                         last_ok = (rc == 0) && last_a[0] && (strncmp(last_a, "Error", 5) != 0);
+                        chat_scroll = 100000;
 
                         thinking = false;
                         if (last_a[0]) {
@@ -250,7 +255,10 @@ int main(int argc, char *argv[]) {
             const char *status = thinking ? "Pensando..." : "Listo";
             ap_draw_text(f, status, leftW / 2 - 30, h / 2 + robotR + 5, txt);
             int bubbleMaxW = rightW * 2 / 3;
-            int by = 40;
+            int visibleH = h - 100;
+            SDL_Rect clip = { rightX, 40, rightW, visibleH };
+            SDL_RenderSetClipRect(ap_get_renderer(), &clip);
+            int by = 40 - chat_scroll;
             if (last_q[0]) {
                 int ux = rightX + rightW - bubbleMaxW;
                 by += draw_bubble(f, ux, by, bubbleMaxW, last_q, 1) + 10;
@@ -261,7 +269,14 @@ int main(int argc, char *argv[]) {
                 by += draw_bubble(f, rightX, by, bubbleMaxW, last_a, 0) + 10;
             } else {
                 ap_draw_text(f, "Pulsa A para preguntar", rightX, by, txt);
+                by += 30;
             }
+            SDL_RenderSetClipRect(ap_get_renderer(), NULL);
+            int contentH = by + chat_scroll - 40;
+            int maxScroll = contentH - visibleH;
+            if (maxScroll < 0) maxScroll = 0;
+            if (chat_scroll > maxScroll) chat_scroll = maxScroll;
+            if (chat_scroll < 0) chat_scroll = 0;
             ap_footer_item foot[] = {
                 { .button = AP_BTN_B, .label = "SALIR" },
                 { .button = AP_BTN_A, .label = "PREGUNTAR" },
@@ -279,7 +294,10 @@ int main(int argc, char *argv[]) {
             const char *status = last_ok ? "Listo" : "Error";
             ap_draw_text(f, status, leftW / 2 - 20, h / 2 + robotR + 5, txt);
             int bubbleMaxW = rightW * 2 / 3;
-            int by = 40;
+            int visibleH = h - 100;
+            SDL_Rect clip = { rightX, 40, rightW, visibleH };
+            SDL_RenderSetClipRect(ap_get_renderer(), &clip);
+            int by = 40 - chat_scroll;
             if (last_q[0]) {
                 int ux = rightX + rightW - bubbleMaxW;
                 by += draw_bubble(f, ux, by, bubbleMaxW, last_q, 1) + 10;
@@ -287,6 +305,12 @@ int main(int argc, char *argv[]) {
             if (last_a[0]) {
                 by += draw_bubble(f, rightX, by, bubbleMaxW, last_a, 0) + 10;
             }
+            SDL_RenderSetClipRect(ap_get_renderer(), NULL);
+            int contentH = by + chat_scroll - 40;
+            int maxScroll = contentH - visibleH;
+            if (maxScroll < 0) maxScroll = 0;
+            if (chat_scroll > maxScroll) chat_scroll = maxScroll;
+            if (chat_scroll < 0) chat_scroll = 0;
             ap_footer_item foot[] = {
                 { .button = AP_BTN_B, .label = "VOLVER" },
                 { .button = AP_BTN_A, .label = "NUEVA" }

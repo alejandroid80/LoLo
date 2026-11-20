@@ -174,7 +174,7 @@ int main(int argc, char *argv[]) {
                     if (state == 0) running = false;
                     else state = 0;
                 }
-                if (ev.button == AP_BTN_MENU) state = 2;
+                if (ev.button == AP_BTN_X) state = 2;
                 if (ev.button == AP_BTN_A && state == 0 && !thinking) {
                     ap_keyboard_result kr;
                     int rc = ap_keyboard("", "Escribe tu pregunta:", AP_KB_GENERAL, &kr);
@@ -187,10 +187,10 @@ int main(int argc, char *argv[]) {
                         ap_clear_screen();
                         SDL_SetRenderDrawColor(ap_get_renderer(), 0, 0, 0, 255);
                         SDL_RenderClear(ap_get_renderer());
-                        draw_robot(w / 2, h / 2, (w < h ? w : h) / 2 - 40, blink, 0.8f, 0.15f, 4);
+                        draw_robot(w / 2, h / 2, h / 4, blink, 0.8f, 0.15f, 4);
                         TTF_Font *f = ap_get_font(AP_FONT_MEDIUM);
                         ap_color txt = ap_hex_to_color("#FFFFFF");
-                        ap_draw_text(f, "Pensando...", w / 2 - 50, h / 2 + (w < h ? w : h) / 2 - 20, txt);
+                        ap_draw_text(f, "Pensando...", w / 2 - 50, h / 2 + h / 4 - 20, txt);
                         ap_present();
 
                         char sys[1024]; strncpy(sys, cfg.system_prompt, sizeof(sys)-1); sys[sizeof(sys)-1]=0;
@@ -217,23 +217,23 @@ int main(int argc, char *argv[]) {
         SDL_RenderClear(ap_get_renderer());
 
         if (state == 0) {
-            draw_robot(w / 2, h / 2, (w < h ? w : h) / 2 - 40, blink, talk, smile, thinking ? 4 : 0);
+            draw_robot(w / 2, h / 2, h / 4, blink, talk, smile, thinking ? 4 : 0);
             TTF_Font *f = ap_get_font(AP_FONT_SMALL);
             ap_color txt = ap_hex_to_color("#FFFFFF");
             const char *status = thinking ? "Pensando..." : "Listo";
-            ap_draw_text(f, status, w / 2 - 30, h / 2 + (w < h ? w : h) / 2 - 20, txt);
+            ap_draw_text(f, status, w / 2 - 30, h / 2 + h / 4 - 20, txt);
             ap_footer_item foot[] = {
                 { .button = AP_BTN_B, .label = "SALIR" },
                 { .button = AP_BTN_A, .label = "PREGUNTAR" },
-                { .button = AP_BTN_MENU, .label = "AJUSTES" }
+                { .button = AP_BTN_X, .label = "AJUSTES" }
             };
             ap_draw_footer(foot, 3);
         } else if (state == 1) {
-            draw_robot(w / 2, h / 2, (w < h ? w : h) / 2 - 80, blink, 0.3f, smile, last_ok ? 1 : 2);
+            draw_robot(w / 4, h / 2, h / 4, blink, 0.3f, smile, last_ok ? 1 : 2);
             TTF_Font *f = ap_get_font(AP_FONT_SMALL);
             ap_color txt = ap_hex_to_color("#FFFFFF");
-            ap_draw_text(f, "Respuesta:", 40, h / 3, txt);
-            ap_draw_text_wrapped(f, last_a, 40, h / 3 + 30, w - 80, txt, 0);
+            ap_draw_text(f, "Respuesta:", w / 2, h / 4, txt);
+            ap_draw_text_wrapped(f, last_a, w / 2, h / 4 + 30, w / 2 - 40, txt, 0);
             ap_footer_item foot[] = {
                 { .button = AP_BTN_B, .label = "VOLVER" },
                 { .button = AP_BTN_A, .label = "NUEVA" }

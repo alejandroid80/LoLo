@@ -117,7 +117,7 @@ static void draw_robot(int cx, int cy, int r, bool blink, float talk, float smil
     int my = cy + r / 3;
     for (int i = 0; i < mw; i++) {
         int x = mx + i;
-        int off = (int)(-smile * 0.004f * (float)(i - mw/2) * (float)(i - mw/2));
+        int off = (int)(-smile * 0.02f * (float)(i - mw/2) * (float)(i - mw/2));
         for (int s = 0; s < 3; s++) {
             SDL_Rect m = { x, my + off + s, 1, 1 };
             SDL_RenderFillRect(ren, &m);

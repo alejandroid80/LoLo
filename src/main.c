@@ -338,7 +338,10 @@ int main(int argc, char *argv[]) {
             };
             ap_draw_footer(foot, 2);
         } else if (state == 2) {
-            const char *items[] = { "Proveedor", "Modelo", "API Key", "Prompt sistema", "Historial", "Volver" };
+            const char *provNames[] = { "Pollinations", "OpenRouter", "Gemini" };
+            static char provItem[64];
+            snprintf(provItem, sizeof(provItem), "Proveedor: %s", provNames[cfg.provider]);
+            const char *items[] = { provItem, "Modelo", "API Key", "Prompt sistema", "Historial", "Volver" };
             ap_list_item li[6];
             memset(li, 0, sizeof(li));
             for (int i = 0; i < 6; i++) li[i].label = items[i];
@@ -359,6 +362,7 @@ int main(int argc, char *argv[]) {
                     memset(pl, 0, sizeof(pl));
                     for (int i = 0; i < 3; i++) pl[i].label = prov[i];
                     ap_list_opts po = ap_list_default_opts("Proveedor", pl, 3);
+                    po.initial_index = cfg.provider;
                     ap_list_result pr;
                     if (ap_list(&po, &pr) == AP_OK && pr.selected_index >= 0) {
                         cfg.provider = pr.selected_index;

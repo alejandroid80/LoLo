@@ -108,13 +108,13 @@ static void draw_robot(int cx, int cy, int r, bool blink, float talk, float smil
             int mid = browLen / 2;
             int dist = (i > mid) ? (i - mid) : (mid - i);
             if (emotion == 1) { /* feliz: cejas arriba en el centro */
-                y = browY - (mid - dist) / 4;
+                y = browY - (mid - dist) / 2;
             } else if (emotion == 2) { /* triste: cejas bajas en el centro */
-                y = browY + (mid - dist) / 4;
+                y = browY + (mid - dist) / 2;
             } else if (emotion == 3) { /* enfadado: cejas inclinadas hacia el centro */
-                if (e == 0) y = browY + i / 3; else y = browY + (browLen - i) / 3;
+                if (e == 0) y = browY + i / 2; else y = browY + (browLen - i) / 2;
             } else if (emotion == 4) { /* sorprendido: cejas mas arriba */
-                y = browY - 8;
+                y = browY - 10;
             }
             SDL_Rect px = { x, y, 1, 3 };
             SDL_RenderFillRect(ren, &px);

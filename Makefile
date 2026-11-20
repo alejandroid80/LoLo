@@ -22,7 +22,7 @@ tg5040:
 		make -C /workspace -f ports/tg5040/Makefile BUILD_DIR=/workspace/$(BUILD_DIR)/tg5040
 	@mkdir -p LoLo.pak/bin
 	@cp $(BUILD_DIR)/tg5040/$(APP_NAME) LoLo.pak/bin/
-	@echo "Built for tg5040 -> AIAssistant.pak/bin/"
+	@echo "Built for tg5040 -> LoLo.pak/bin/"
 
 clean:
 	rm -rf $(BUILD_DIR)

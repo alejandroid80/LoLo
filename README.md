@@ -11,7 +11,7 @@ Requiere Docker con la imagen `ghcr.io/loveretro/tg5040-toolchain:latest`.
 make tg5040
 ```
 
-El binario queda en `AIAssistant.pak/bin/aiassistant`.
+El binario queda en `LoLo.pak/bin/lolo`.
 
 ## Instalar
 

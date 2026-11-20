@@ -109,8 +109,8 @@ static void draw_robot(int cx, int cy, int r, bool blink, float talk, float smil
             int dist = (i > mid) ? (i - mid) : (mid - i);
             if (emotion == 1) { /* feliz: cejas arriba en el centro */
                 y = browY - (mid - dist) / 2;
-            } else if (emotion == 2) { /* triste: cejas bajas en el centro */
-                y = browY + (mid - dist) / 2;
+            } else if (emotion == 2) { /* triste: cejas rectas y mas bajas */
+                y = browY + 4;
             } else if (emotion == 3) { /* enfadado: cejas inclinadas hacia el centro */
                 if (e == 0) y = browY + i / 2; else y = browY + (browLen - i) / 2;
             } else if (emotion == 4) { /* sorprendido: cejas mas arriba */

@@ -6,6 +6,7 @@ LOG_FILE="$LOG_DIR/$APP_NAME.log"
 
 cd "$APP_DIR" || exit 1
 killall minui-presenter >/dev/null 2>&1 || true
+killall minarch.elf retroarch >/dev/null 2>&1 || true
 chmod +x launch.sh bin/* 2>/dev/null
 
 log() { echo "[$(date '+%H:%M:%S')] $1" | tee -a "$LOG_FILE"; }

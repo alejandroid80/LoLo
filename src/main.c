@@ -276,7 +276,7 @@ int main(int argc, char *argv[]) {
                 ap_draw_text(f, "Pulsa B de nuevo para salir", leftW / 2 - 80, h / 2 + robotR + 25, txt);
             }
             int bubbleMaxW = rightW;
-            int visibleH = h - 100;
+            int visibleH = h - 130;
             SDL_Rect clip = { rightX, 40, rightW, visibleH };
             SDL_RenderSetClipRect(ap_get_renderer(), &clip);
             int by = 40 - chat_scroll;
@@ -315,7 +315,7 @@ int main(int argc, char *argv[]) {
             const char *status = last_ok ? "Listo" : "Error";
             ap_draw_text(f, status, leftW / 2 - 20, h / 2 + robotR + 5, txt);
             int bubbleMaxW = rightW;
-            int visibleH = h - 100;
+            int visibleH = h - 130;
             SDL_Rect clip = { rightX, 40, rightW, visibleH };
             SDL_RenderSetClipRect(ap_get_renderer(), &clip);
             int by = 40 - chat_scroll;

@@ -444,7 +444,7 @@ int main(int argc, char *argv[]) {
         }
 
         ap_present();
-        SDL_Delay(16);
+        SDL_Delay(1);
     }
 
     ap_quit();

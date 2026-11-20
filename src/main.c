@@ -134,6 +134,24 @@ static void draw_robot(int cx, int cy, int r, bool blink, float talk, float smil
     }
 }
 
+static int draw_bubble(TTF_Font *f, int x, int y, int maxw, const char *text, int isUser) {
+    if (!text || !text[0] || maxw <= 0) return 0;
+    SDL_Renderer *ren = ap_get_renderer();
+    int pad = 8;
+    ap_color textColor = isUser ? (ap_color){0, 0, 0, 255} : ap_hex_to_color("#FFFFFF");
+    ap_color bubbleColor = isUser ? ap_hex_to_color("#FFFFFF") : ap_hex_to_color("#2A2A2A");
+    int h = ap_draw_text_wrapped(f, text, x + pad, y + pad, maxw - 2 * pad,
+                                 textColor, isUser ? AP_ALIGN_RIGHT : AP_ALIGN_LEFT);
+    SDL_SetRenderDrawColor(ren, bubbleColor.r, bubbleColor.g, bubbleColor.b, 255);
+    SDL_Rect r = { x, y, maxw, h + 2 * pad };
+    SDL_RenderFillRect(ren, &r);
+    SDL_SetRenderDrawColor(ren, 255, 255, 255, 255);
+    SDL_RenderDrawRect(ren, &r);
+    ap_draw_text_wrapped(f, text, x + pad, y + pad, maxw - 2 * pad,
+                         textColor, isUser ? AP_ALIGN_RIGHT : AP_ALIGN_LEFT);
+    return h + 2 * pad;
+}
+
 int main(int argc, char *argv[]) {
     (void)argc; (void)argv;
     ap_config acfg = {
@@ -184,13 +202,18 @@ int main(int argc, char *argv[]) {
                         thinking = true;
 
                         int w = ap_get_screen_width(), h = ap_get_screen_height();
+                        int leftW = w / 3;
+                        int rightX = leftW + 10;
+                        int rightW = w - rightX - 10;
+                        int robotR = leftW / 2 - 16;
                         ap_clear_screen();
                         SDL_SetRenderDrawColor(ap_get_renderer(), 0, 0, 0, 255);
                         SDL_RenderClear(ap_get_renderer());
-                        draw_robot(w / 2, h / 2, h / 4, blink, 0.8f, 0.15f, 4);
+                        draw_robot(leftW / 2, h / 2, robotR, blink, 0.8f, 0.15f, 4);
                         TTF_Font *f = ap_get_font(AP_FONT_MEDIUM);
                         ap_color txt = ap_hex_to_color("#FFFFFF");
-                        ap_draw_text(f, "Pensando...", w / 2 - 50, h / 2 + h / 4 - 20, txt);
+                        int bubbleMaxW = rightW * 2 / 3;
+                        draw_bubble(f, rightX, 40, bubbleMaxW, "Pensando...", 0);
                         ap_present();
 
                         char sys[1024]; strncpy(sys, cfg.system_prompt, sizeof(sys)-1); sys[sizeof(sys)-1]=0;
@@ -217,11 +240,28 @@ int main(int argc, char *argv[]) {
         SDL_RenderClear(ap_get_renderer());
 
         if (state == 0) {
-            draw_robot(w / 2, h / 2, h / 4, blink, talk, smile, thinking ? 4 : 0);
+            int leftW = w / 3;
+            int rightX = leftW + 10;
+            int rightW = w - rightX - 10;
+            int robotR = leftW / 2 - 16;
+            draw_robot(leftW / 2, h / 2, robotR, blink, talk, smile, thinking ? 4 : 0);
             TTF_Font *f = ap_get_font(AP_FONT_SMALL);
             ap_color txt = ap_hex_to_color("#FFFFFF");
             const char *status = thinking ? "Pensando..." : "Listo";
-            ap_draw_text(f, status, w / 2 - 30, h / 2 + h / 4 - 20, txt);
+            ap_draw_text(f, status, leftW / 2 - 30, h / 2 + robotR + 5, txt);
+            int bubbleMaxW = rightW * 2 / 3;
+            int by = 40;
+            if (last_q[0]) {
+                int ux = rightX + rightW - bubbleMaxW;
+                by += draw_bubble(f, ux, by, bubbleMaxW, last_q, 1) + 10;
+            }
+            if (thinking) {
+                by += draw_bubble(f, rightX, by, bubbleMaxW, "Pensando...", 0) + 10;
+            } else if (last_a[0]) {
+                by += draw_bubble(f, rightX, by, bubbleMaxW, last_a, 0) + 10;
+            } else {
+                ap_draw_text(f, "Pulsa A para preguntar", rightX, by, txt);
+            }
             ap_footer_item foot[] = {
                 { .button = AP_BTN_B, .label = "SALIR" },
                 { .button = AP_BTN_A, .label = "PREGUNTAR" },
@@ -229,11 +269,24 @@ int main(int argc, char *argv[]) {
             };
             ap_draw_footer(foot, 3);
         } else if (state == 1) {
-            draw_robot(w / 4, h / 2, h / 4, blink, 0.3f, smile, last_ok ? 1 : 2);
+            int leftW = w / 3;
+            int rightX = leftW + 10;
+            int rightW = w - rightX - 10;
+            int robotR = leftW / 2 - 16;
+            draw_robot(leftW / 2, h / 2, robotR, blink, 0.3f, smile, last_ok ? 1 : 2);
             TTF_Font *f = ap_get_font(AP_FONT_SMALL);
             ap_color txt = ap_hex_to_color("#FFFFFF");
-            ap_draw_text(f, "Respuesta:", w / 2, h / 4, txt);
-            ap_draw_text_wrapped(f, last_a, w / 2, h / 4 + 30, w / 2 - 40, txt, 0);
+            const char *status = last_ok ? "Listo" : "Error";
+            ap_draw_text(f, status, leftW / 2 - 20, h / 2 + robotR + 5, txt);
+            int bubbleMaxW = rightW * 2 / 3;
+            int by = 40;
+            if (last_q[0]) {
+                int ux = rightX + rightW - bubbleMaxW;
+                by += draw_bubble(f, ux, by, bubbleMaxW, last_q, 1) + 10;
+            }
+            if (last_a[0]) {
+                by += draw_bubble(f, rightX, by, bubbleMaxW, last_a, 0) + 10;
+            }
             ap_footer_item foot[] = {
                 { .button = AP_BTN_B, .label = "VOLVER" },
                 { .button = AP_BTN_A, .label = "NUEVA" }

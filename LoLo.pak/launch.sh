@@ -5,6 +5,7 @@ LOG_DIR="${LOGS_PATH:-/tmp}"
 LOG_FILE="$LOG_DIR/$APP_NAME.log"
 
 cd "$APP_DIR" || exit 1
+env > /tmp/lolo_env.txt 2>&1
 killall minui-presenter >/dev/null 2>&1 || true
 killall minarch.elf retroarch >/dev/null 2>&1 || true
 chmod +x launch.sh bin/* 2>/dev/null
@@ -30,4 +31,5 @@ ensure_wifi() {
 ensure_wifi
 
 export LD_LIBRARY_PATH="/usr/trimui/lib:$APP_DIR:$LD_LIBRARY_PATH"
+export SDL_RENDER_DRIVER=software
 ./bin/lolo 2>&1 | while IFS= read -r line; do echo "[$(date '+%H:%M:%S')] $line" >> "$LOG_FILE"; done

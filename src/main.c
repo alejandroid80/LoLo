@@ -14,6 +14,7 @@
 #include <sys/stat.h>
 
 static AppConfig cfg;
+static TTF_Font *g_small = NULL;
 static char last_q[1024] = "";
 static char last_a[4096] = "";
 static int last_ok = 1;
@@ -163,6 +164,8 @@ int main(int argc, char *argv[]) {
         .disable_background = true
     };
     if (ap_init(&acfg) != AP_OK) return 1;
+    g_small = TTF_OpenFont("/mnt/SDCARD/.system/res/font1.ttf", 28);
+    if (!g_small) g_small = TTF_OpenFont("./font.ttf", 28);
     config_load(&cfg);
     load_history();
 
@@ -231,7 +234,7 @@ int main(int argc, char *argv[]) {
                         draw_robot(leftW / 2, h / 2, robotR, blink, 0.8f, 0.15f, 4);
                         TTF_Font *f = ap_get_font(AP_FONT_MEDIUM);
                         ap_color txt = ap_hex_to_color("#FFFFFF");
-                        int bubbleMaxW = rightW * 2 / 3;
+                        int bubbleMaxW = rightW;
                         draw_bubble(f, rightX, 40, bubbleMaxW, "Pensando...", 0);
                         ap_present();
 
@@ -265,14 +268,14 @@ int main(int argc, char *argv[]) {
             int rightW = w - rightX - 10;
             int robotR = leftW / 2 - 16;
             draw_robot(leftW / 2, h / 2, robotR, blink, talk, smile, thinking ? 4 : 0);
-            TTF_Font *f = ap_get_font(AP_FONT_SMALL);
+            TTF_Font *f = g_small ? g_small : ap_get_font(AP_FONT_SMALL);
             ap_color txt = ap_hex_to_color("#FFFFFF");
             const char *status = thinking ? "Pensando..." : "Listo";
             ap_draw_text(f, status, leftW / 2 - 30, h / 2 + robotR + 5, txt);
             if (exit_pending) {
                 ap_draw_text(f, "Pulsa B de nuevo para salir", leftW / 2 - 80, h / 2 + robotR + 25, txt);
             }
-            int bubbleMaxW = rightW * 2 / 3;
+            int bubbleMaxW = rightW;
             int visibleH = h - 100;
             SDL_Rect clip = { rightX, 40, rightW, visibleH };
             SDL_RenderSetClipRect(ap_get_renderer(), &clip);
@@ -307,11 +310,11 @@ int main(int argc, char *argv[]) {
             int rightW = w - rightX - 10;
             int robotR = leftW / 2 - 16;
             draw_robot(leftW / 2, h / 2, robotR, blink, 0.3f, smile, last_ok ? 1 : 2);
-            TTF_Font *f = ap_get_font(AP_FONT_SMALL);
+            TTF_Font *f = g_small ? g_small : ap_get_font(AP_FONT_SMALL);
             ap_color txt = ap_hex_to_color("#FFFFFF");
             const char *status = last_ok ? "Listo" : "Error";
             ap_draw_text(f, status, leftW / 2 - 20, h / 2 + robotR + 5, txt);
-            int bubbleMaxW = rightW * 2 / 3;
+            int bubbleMaxW = rightW;
             int visibleH = h - 100;
             SDL_Rect clip = { rightX, 40, rightW, visibleH };
             SDL_RenderSetClipRect(ap_get_renderer(), &clip);

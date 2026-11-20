@@ -70,7 +70,7 @@ static void save_history_entry(const char *q, const char *a) {
     fclose(f);
 }
 
-static void draw_robot(int cx, int cy, int r, bool blink, float talk, int emotion) {
+static void draw_robot(int cx, int cy, int r, bool blink, float talk, float smile, float brow) {
     SDL_Renderer *ren = ap_get_renderer();
     int stroke = 4;
     /* cara cuadrada (contorno blanco) */
@@ -103,30 +103,22 @@ static void draw_robot(int cx, int cy, int r, bool blink, float talk, int emotio
         int bx = (e == 0) ? ex1 : ex2;
         for (int i = 0; i < browLen; i++) {
             int x = bx + i;
-            int y = browY;
-            /* happy: extremos exteriores bajos -> centro alto? simplificamos por ojo */
-            if (emotion == 1) { /* feliz: cejas arriba en el centro */
-                int mid = browLen / 2;
-                y = browY - (mid - (i > mid ? i - mid : mid - i)) / 2;
-            } else if (emotion == 2) { /* triste: cejas bajas en el centro */
-                int mid = browLen / 2;
-                y = browY + (mid - (i > mid ? i - mid : mid - i)) / 2;
-            } else if (emotion == 3) { /* enfadado: cejas inclinadas hacia el centro */
-                if (e == 0) y = browY + i / 3; else y = browY + (browLen - i) / 3;
-            } else if (emotion == 4) { /* sorprendido: cejas mas arriba */
-                y = browY - 10;
-            }
+            int y = browY + (int)brow;
             SDL_Rect px = { x, y, 1, 3 };
             SDL_RenderFillRect(ren, &px);
         }
     }
-    /* boca: linea horizontal que se alarga con talk */
+    /* boca: linea que se alarga con talk y se curva con smile */
     int mw = r / 2 + (int)(talk * r / 4);
     int mx = cx - mw / 2;
     int my = cy + r / 3;
-    for (int s = 0; s < 3; s++) {
-        SDL_Rect m = { mx, my + s, mw, 1 };
-        SDL_RenderFillRect(ren, &m);
+    for (int i = 0; i < mw; i++) {
+        int x = mx + i;
+        int off = (int)(smile * 0.004f * (float)(i - mw/2) * (float)(i - mw/2));
+        for (int s = 0; s < 3; s++) {
+            SDL_Rect m = { x, my + off + s, 1, 1 };
+            SDL_RenderFillRect(ren, &m);
+        }
     }
 }
 
@@ -147,6 +139,8 @@ int main(int argc, char *argv[]) {
     Uint32 blinkEnd = 0;
     float talk = 0.0f;
     bool thinking = false;
+    float smile = 0.0f, target_smile = 0.0f;
+    float brow = 0.0f, target_brow = 0.0f;
 
     bool running = true;
     while (running) {
@@ -155,6 +149,12 @@ int main(int argc, char *argv[]) {
         if (blink && now > blinkEnd) blink = false;
         if (thinking) talk = (sinf((float)now / 120.0f) + 1.0f) / 2.0f;
         else talk *= 0.85f;
+
+        if (thinking) { target_smile = 0.15f; target_brow = -8.0f; }
+        else if (state == 1) { target_smile = 0.4f; target_brow = -4.0f; }
+        else { target_smile = 0.0f; target_brow = 0.0f; }
+        smile += (target_smile - smile) * 0.1f;
+        brow += (target_brow - brow) * 0.1f;
 
         ap_input_event ev;
         if (state == 0 || state == 1) {
@@ -177,7 +177,7 @@ int main(int argc, char *argv[]) {
                         ap_clear_screen();
                         SDL_SetRenderDrawColor(ap_get_renderer(), 0, 0, 0, 255);
                         SDL_RenderClear(ap_get_renderer());
-                        draw_robot(w / 2, h / 2, (w < h ? w : h) / 2 - 40, blink, 0.8f, 4);
+                        draw_robot(w / 2, h / 2, (w < h ? w : h) / 2 - 40, blink, 0.8f, 0.15f, -8.0f);
                         TTF_Font *f = ap_get_font(AP_FONT_MEDIUM);
                         ap_color txt = ap_hex_to_color("#FFFFFF");
                         ap_draw_text(f, "Pensando...", w / 2 - 50, h / 2 + (w < h ? w : h) / 2 - 20, txt);
@@ -206,7 +206,7 @@ int main(int argc, char *argv[]) {
         SDL_RenderClear(ap_get_renderer());
 
         if (state == 0) {
-            draw_robot(w / 2, h / 2, (w < h ? w : h) / 2 - 40, blink, talk, thinking ? 4 : 0);
+            draw_robot(w / 2, h / 2, (w < h ? w : h) / 2 - 40, blink, talk, smile, brow);
             TTF_Font *f = ap_get_font(AP_FONT_SMALL);
             ap_color txt = ap_hex_to_color("#FFFFFF");
             const char *status = thinking ? "Pensando..." : "Listo";
@@ -218,7 +218,7 @@ int main(int argc, char *argv[]) {
             };
             ap_draw_footer(foot, 3);
         } else if (state == 1) {
-            draw_robot(w / 2, h / 2, (w < h ? w : h) / 2 - 80, blink, 0.3f, 1);
+            draw_robot(w / 2, h / 2, (w < h ? w : h) / 2 - 80, blink, 0.3f, smile, brow);
             TTF_Font *f = ap_get_font(AP_FONT_SMALL);
             ap_color txt = ap_hex_to_color("#FFFFFF");
             ap_draw_text(f, "Respuesta:", 40, h / 3, txt);

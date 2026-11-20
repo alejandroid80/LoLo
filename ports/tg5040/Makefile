@@ -5,7 +5,7 @@ STRIP := $(CROSS_COMPILE)strip
 SRC := $(shell find /workspace/src -name '*.c' | sort)
 INCLUDES := -I/workspace/third_party/apostrophe/include -I/workspace/src
 SDL_CFLAGS := $(shell pkg-config --cflags sdl2)
-SDL_LDFLAGS := $(shell pkg-config --libs sdl2) -lSDL2_ttf -lm -lpthread -ldl
+SDL_LDFLAGS := $(shell pkg-config --libs sdl2) -lSDL2_ttf -lSDL2_image -lm -lpthread -ldl
 
 CFLAGS := -std=gnu11 -O2 -Wall -Wextra -Wno-unused-parameter \
 	-mcpu=cortex-a53 -mtune=cortex-a53 -DPLATFORM_TG5040 \

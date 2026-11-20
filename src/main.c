@@ -195,7 +195,7 @@ int main(int argc, char *argv[]) {
                 if (ev.button == AP_BTN_X) state = 2;
                 if (ev.button == AP_BTN_A && state == 0 && !thinking) {
                     ap_keyboard_result kr;
-                    int rc = ap_keyboard("", "Escribe tu pregunta:", AP_KB_GENERAL, &kr);
+                    int rc = ap_keyboard("", "Escribe tu pregunta:  (B: cancelar)", AP_KB_GENERAL, &kr);
                     if (rc == AP_OK && kr.text[0]) {
                         strncpy(last_q, kr.text, sizeof(last_q) - 1);
                         last_q[sizeof(last_q)-1] = 0;
@@ -321,21 +321,21 @@ int main(int argc, char *argv[]) {
                     }
                 } else if (idx == 1) {
                     ap_keyboard_result kr;
-                    if (ap_keyboard(cfg.model, "Modelo:", AP_KB_GENERAL, &kr) == AP_OK) {
+                    if (ap_keyboard(cfg.model, "Modelo:  (B: cancelar)", AP_KB_GENERAL, &kr) == AP_OK) {
                         strncpy(cfg.model, kr.text, sizeof(cfg.model) - 1);
                         cfg.model[sizeof(cfg.model)-1] = 0;
                         config_save(&cfg);
                     }
                 } else if (idx == 2) {
                     ap_keyboard_result kr;
-                    if (ap_keyboard(cfg.api_key, "API Key:", AP_KB_GENERAL, &kr) == AP_OK) {
+                    if (ap_keyboard(cfg.api_key, "API Key:  (B: cancelar)", AP_KB_GENERAL, &kr) == AP_OK) {
                         strncpy(cfg.api_key, kr.text, sizeof(cfg.api_key) - 1);
                         cfg.api_key[sizeof(cfg.api_key)-1] = 0;
                         config_save(&cfg);
                     }
                 } else if (idx == 3) {
                     ap_keyboard_result kr;
-                    if (ap_keyboard(cfg.system_prompt, "Prompt sistema:", AP_KB_GENERAL, &kr) == AP_OK) {
+                    if (ap_keyboard(cfg.system_prompt, "Prompt sistema:  (B: cancelar)", AP_KB_GENERAL, &kr) == AP_OK) {
                         strncpy(cfg.system_prompt, kr.text, sizeof(cfg.system_prompt) - 1);
                         cfg.system_prompt[sizeof(cfg.system_prompt)-1] = 0;
                         config_save(&cfg);

@@ -157,10 +157,10 @@ int main(int argc, char *argv[]) {
     ap_config acfg = {
         .window_title = "LoLo",
         .log_path = ap_resolve_log_path("lolo"),
-        .is_nextui = AP_PLATFORM_IS_DEVICE
+        .is_nextui = AP_PLATFORM_IS_DEVICE,
+        .font_path = "/mnt/SDCARD/.system/res/font1.ttf"
     };
     if (ap_init(&acfg) != AP_OK) return 1;
-
     config_load(&cfg);
     load_history();
 
@@ -295,6 +295,7 @@ int main(int argc, char *argv[]) {
         } else if (state == 2) {
             const char *items[] = { "Proveedor", "Modelo", "API Key", "Prompt sistema", "Historial", "Volver" };
             ap_list_item li[6];
+            memset(li, 0, sizeof(li));
             for (int i = 0; i < 6; i++) li[i].label = items[i];
             ap_footer_item foot[] = {
                 { .button = AP_BTN_B, .label = "VOLVER" },
@@ -310,6 +311,7 @@ int main(int argc, char *argv[]) {
                 if (idx == 0) {
                     const char *prov[] = { "Pollinations (sin key)", "OpenRouter", "Gemini" };
                     ap_list_item pl[3];
+                    memset(pl, 0, sizeof(pl));
                     for (int i = 0; i < 3; i++) pl[i].label = prov[i];
                     ap_list_opts po = ap_list_default_opts("Proveedor", pl, 3);
                     ap_list_result pr;

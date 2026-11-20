@@ -63,7 +63,7 @@ int net_ask(int provider, const char *model, const char *api_key,
             fclose(f);
         }
         snprintf(cmd, sizeof(cmd),
-            "curl -s -m 45 -o /tmp/ai_resp.txt "
+            "curl -sk -m 45 -o /tmp/ai_resp.txt "
             "-H \"Authorization: Bearer %s\" -H \"Content-Type: application/json\" "
             "-d @/tmp/ai_req.json https://openrouter.ai/api/v1/chat/completions",
             (api_key && api_key[0]) ? api_key : "");
@@ -105,7 +105,7 @@ int net_ask(int provider, const char *model, const char *api_key,
             fclose(f);
         }
         snprintf(cmd, sizeof(cmd),
-            "curl -s -m 45 -o /tmp/ai_resp.txt "
+            "curl -sk -m 45 -o /tmp/ai_resp.txt "
             "-H \"Content-Type: application/json\" "
             "-d @/tmp/ai_req.json "
             "\"https://generativelanguage.googleapis.com/v1beta/models/%s:generateContent?key=%s\"",
@@ -140,7 +140,7 @@ int net_ask(int provider, const char *model, const char *api_key,
     urlencode(question ? question : "", encq, sizeof(encq));
     urlencode(system_prompt ? system_prompt : "", encs, sizeof(encs));
     snprintf(cmd, sizeof(cmd),
-        "curl -s -m 45 -o /tmp/ai_resp.txt "
+        "curl -sk -m 45 -o /tmp/ai_resp.txt "
         "\"https://text.pollinations.ai/%s?system=%s&seed=%ld&temperature=0.7\"",
         encq, encs, (long)time(NULL));
     system(cmd);
